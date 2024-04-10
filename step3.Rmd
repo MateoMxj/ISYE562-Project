@@ -1,0 +1,275 @@
+---
+title: 'Project Deliverable 3: Demonstration analysis'
+author: Aakash Yadav, Rika Luong, Mateo Ma, Zixuan Su, Oliver Nguyen
+date: "Apr. 29, 2024"
+output:
+  html_document:
+    toc: yes
+    toc_float: true
+    toc_collapsed: false
+    df_print: paged
+  html_notebook:
+    
+    toc: yes
+    toc_float: true
+    toc_collapsed: false
+    df_print: paged
+---
+
+# Process
+## Setup 
+### Libraries
+```{r libraries, echo=FALSE}
+library(tidyverse)
+library(skimr)
+library(kernlab)
+library(ipred)
+library(ggpubr)
+library(tidymodels)
+library(assertr)
+library(xgboost) ## For the xgboost model
+library(vip) ## For variable importance plots
+library(ranger) ## For random forest
+library(ggplot2)
+library(tm)
+library(wordcloud)
+library(tidytext)
+library(janeaustenr)
+```
+
+### Load data
+```{r loadData}
+df = read.csv("clustered_data.csv")
+
+domain_stop_words <- data.frame(word = c("human","factor","factors","research","review","1","2","due","method","methods","related","result","results","data"))
+```
+```{r}
+# Split the DataFrame by the values of the Cluster columns
+df_0 <- filter(df, Cluster == 0)
+df_1 <- filter(df, Cluster == 1)
+df_2 <- filter(df, Cluster == 2)
+df_3 <- filter(df, Cluster == 3)
+df_4 <- filter(df, Cluster == 4)
+df_5 <- filter(df, Cluster == 5)
+df_6 <- filter(df, Cluster == 6)
+df_7 <- filter(df, Cluster == 7)
+df_8 <- filter(df, Cluster == 8)
+df_9 <- filter(df, Cluster == 9)
+```
+
+## keep
+```{r}
+words.df_0 = df_0 %>% 
+  select(paper, Combined) %>% 
+  unnest_tokens(input = "Combined", token = "words", "word")
+
+df_0_proc = words.df_0 %>% 
+  anti_join(stop_words, by = "word") %>%
+  anti_join(domain_stop_words, by = "word")
+
+wc_df_0 = df_0_proc %>% 
+  count(word, sort = T)
+
+ggplot(filter(wc_df_0, n > 1000), aes(x = n, y = reorder(word, n)))+
+  geom_col()+
+  theme_bw()+
+  ylab("")
+```
+## keep nature
+```{r}
+words.df_1 = df_1 %>% 
+  select(paper, Combined) %>% 
+  unnest_tokens(input = "Combined", token = "words", "word")
+
+df_1_proc = words.df_1 %>% 
+  anti_join(stop_words, by = "word") %>%
+  anti_join(domain_stop_words, by = "word")
+
+wc_df_1 = df_1_proc %>% 
+  count(word, sort = T)
+
+ggplot(filter(wc_df_1, n > 1000), aes(x = n, y = reorder(word, n)))+
+  geom_col()+
+  theme_bw()+
+  ylab("")
+```
+### keep airplane
+```{r}
+words.df_2 = df_2 %>% 
+  select(paper, Combined) %>% 
+  unnest_tokens(input = "Combined", token = "words", "word")
+
+df_2_proc = words.df_2 %>% 
+  anti_join(stop_words, by = "word") %>%
+  anti_join(domain_stop_words, by = "word")
+
+wc_df_2 = df_2_proc %>% 
+  count(word, sort = T)
+
+ggplot(filter(wc_df_2, n > 1000), aes(x = n, y = reorder(word, n)))+
+  geom_col()+
+  theme_bw()+
+  ylab("")
+```
+
+### keep hf
+```{r}
+words.df_3 = df_3 %>% 
+  select(paper, Combined) %>% 
+  unnest_tokens(input = "Combined", token = "words", "word")
+
+df_3_proc = words.df_3 %>% 
+  anti_join(stop_words, by = "word") %>%
+  anti_join(domain_stop_words, by = "word")
+
+wc_df_3 = df_3_proc %>% 
+  count(word, sort = T)
+
+ggplot(filter(wc_df_3, n > 1000), aes(x = n, y = reorder(word, n)))+
+  geom_col()+
+  theme_bw()+
+  ylab("")
+```
+
+### keep labor
+
+```{r}
+words.df_4 = df_4 %>% 
+  select(paper, Combined) %>% 
+  unnest_tokens(input = "Combined", token = "words", "word")
+
+df_4_proc = words.df_4 %>% 
+  anti_join(stop_words, by = "word") %>%
+  anti_join(domain_stop_words, by = "word")
+
+wc_df_4 = df_4_proc %>% 
+  count(word, sort = T)
+
+ggplot(filter(wc_df_4, n > 1000), aes(x = n, y = reorder(word, n)))+
+  geom_col()+
+  theme_bw()+
+  ylab("")
+```
+
+### keep hospital
+```{r}
+words.df_5 = df_5 %>% 
+  select(paper, Combined) %>% 
+  unnest_tokens(input = "Combined", token = "words", "word")
+
+df_5_proc = words.df_5 %>% 
+  anti_join(stop_words, by = "word") %>%
+  anti_join(domain_stop_words, by = "word")
+
+wc_df_5 = df_5_proc %>% 
+  count(word, sort = T)
+
+ggplot(filter(wc_df_5, n > 1000), aes(x = n, y = reorder(word, n)))+
+  geom_col()+
+  theme_bw()+
+  ylab("")
+```
+### keep hf
+```{r}
+words.df_6 = df_6 %>% 
+  select(paper, Combined) %>% 
+  unnest_tokens(input = "Combined", token = "words", "word")
+
+df_6_proc = words.df_6 %>% 
+  anti_join(stop_words, by = "word") %>%
+  anti_join(domain_stop_words, by = "word")
+
+wc_df_6 = df_6_proc %>% 
+  count(word, sort = T)
+
+ggplot(filter(wc_df_6, n > 1000), aes(x = n, y = reorder(word, n)))+
+  geom_col()+
+  theme_bw()+
+  ylab("")
+```
+### keep health care
+```{r}
+words.df_7 = df_7 %>% 
+  select(paper, Combined) %>% 
+  unnest_tokens(input = "Combined", token = "words", "word")
+
+df_7_proc = words.df_7 %>% 
+  anti_join(stop_words, by = "word") %>%
+  anti_join(domain_stop_words, by = "word")
+
+wc_df_7 = df_7_proc %>% 
+  count(word, sort = T)
+
+ggplot(filter(wc_df_7, n > 1000), aes(x = n, y = reorder(word, n)))+
+  geom_col()+
+  theme_bw()+
+  ylab("")
+```
+### keep general hf
+```{r}
+words.df_8 = df_8 %>% 
+  select(paper, Combined) %>% 
+  unnest_tokens(input = "Combined", token = "words", "word")
+
+df_8_proc = words.df_8 %>% 
+  anti_join(stop_words, by = "word") %>%
+  anti_join(domain_stop_words, by = "word")
+
+wc_df_8 = df_8_proc %>% 
+  count(word, sort = T)
+
+ggplot(filter(wc_df_8, n > 1000), aes(x = n, y = reorder(word, n)))+
+  geom_col()+
+  theme_bw()+
+  ylab("")
+```
+### keep hf
+```{r}
+words.df_9 = df_9 %>% 
+  select(paper, Combined) %>% 
+  unnest_tokens(input = "Combined", token = "words", "word") %>%
+  mutate(word = wordStem(word))
+
+df_9_proc = words.df_9 %>% 
+  anti_join(stop_words, by = "word") %>%
+  anti_join(domain_stop_words, by = "word")
+
+wc_df_9 = df_9_proc %>% 
+  count(word, sort = T)
+
+ggplot(filter(wc_df_9, n > 2200), aes(x = n, y = reorder(word, n)))+
+  geom_col()+
+  theme_bw()+
+  ylab("")
+```
+
+
+```{r}
+# Simulating user input
+filter_words <- c("autonomy driving drive driver automation autonomous auto")
+
+processed_data <- data_frame(txt = filter_words) %>%
+  unnest_tokens(word, txt) %>%
+  mutate(word = wordStem(word))
+
+word_vector <- processed_data$word
+
+combined = df_9 %>%
+  select(paper, Combined)
+
+df_9 %>%
+  unnest_tokens(word, Combined) %>%
+  anti_join(stop_words) %>%  # remove stop words
+  anti_join(domain_stop_words, by = "word") %>%
+  count(paper, word, sort = TRUE) %>%
+  bind_tf_idf(word, paper, n) %>%  # calculate tf-idf
+  filter(word %in% word_vector) %>%  # search words
+  pivot_wider(names_from = word, values_from = tf_idf) %>%  # pivot wider
+  select(-n, -tf, -idf) %>%  # remove unrelated columns
+  group_by(paper) %>%
+  summarise(across(everything(), sum, na.rm = TRUE)) %>%  # combine the rows
+  mutate(point = rowSums(select(., -1), na.rm = TRUE)) %>%  # calculate the point (the formula can be changed)
+  arrange(desc(point)) %>%
+  head(10) %>%  # see first 10 docs
+  left_join(combined, by = join_by(paper))  # join the title of the doc
+```

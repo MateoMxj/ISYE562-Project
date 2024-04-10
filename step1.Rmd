@@ -1,0 +1,100 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+#Old libraries
+library(tidyverse)
+library(skimr)
+library(tidymodels)
+library(doParallel)
+
+##New libraries (make sure to install them)
+library(tm) # Text cleaning for large corpa similar to tidytext it can help with cleaning and tokenizing
+library(quanteda) # Text cleaning for large corpa similar to tidytext tokenizing
+library(tidytext) # For analysis of text in a tidy manner including sentiment data
+library(textstem) # For stemming and lemmatizing text
+library(gutenbergr) # Project Gutenberg books
+library(wordcloud) # For world cloud
+
+library(lsa) # For latent semantic analysis
+library(topicmodels) #For topic modeling
+library(stm) # For structural topic modeling
+library(uwot) # For umap dimensionality reduction
+library(text2vec) # For cosine similarity 
+library(kernlab) # For kernel-based cannonical correlation analysis
+library(rPref) # For pareto frontier\
+library(DT) # For interactive data tables
+library(textdata) # Database of lexicon and embeddings
+
+library(tidyverse)
+library(skimr)
+library(kernlab)
+library(ipred)
+library(ggpubr)
+library(tidymodels)
+library(assertr)
+library(xgboost) ## For the xgboost model
+library(vip) ## For variable importance plots
+library(ranger) ## For random forest
+library(ggplot2)
+library(tm)
+library(wordcloud)
+
+set.seed(42)
+rm(list = ls(all.names = TRUE))
+
+#Register a parallel processor to speed up tuning:
+all_cores <- parallel::detectCores(logical = FALSE)
+cl <- makePSOCKcluster(all_cores)
+registerDoParallel(cl)
+```
+
+```{r}
+df = read_csv("New Look, Same Great Taste_review_423016_screen_csv_20240322035407.csv")
+
+##add an id column
+df = df %>% 
+  mutate(paper = c(1:nrow(df)))
+
+head(df)
+```
+### Rename columns
+```{r columns}
+df_new <- df %>% 
+  rename(year = `Published Year`) %>%
+  rename(month = `Published Month`)
+
+df_new$Accession.Number <- NULL
+df_new$Notes <- NULL
+df_new$Tags <- NULL
+df_new$Covidence..<-NULL
+
+head(df_new)
+```
+```{r}
+error_df <- df_new %>%
+  chain_start() %>%
+  
+  # check if there are empty abstracts
+  assertr::verify(Abstract != "", error_fun = error_df_return) %>%
+  
+  # check if DOI is unavailable
+  assertr::verify(DOI != "", error_fun = error_df_return) %>%
+  
+  # check if the year is formatted correctly i.e. 4 digits
+  assertr::verify(grepl("^\\d{4}$", year), error_fun = error_df_return) %>%
+  assertr::chain_end(error_fun = error_df_return)
+
+head(error_df)
+```
+
+```{r}
+clean_df <- df_new[!is.na(df_new$Title), ]
+clean_df <- clean_df[!is.na(clean_df$Abstract), ]
+```
+
+```{r}
+write.csv(clean_df, "clean_df.csv")
+```
